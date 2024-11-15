@@ -3,16 +3,19 @@
   hosts: localhost
   gather_facts: true  # ここを変更
   tasks:
-    - name: Restart Deployment by updating annotations
+    - name: Restart Deployment by updating spec.template.metadata.annotations
       kubernetes.core.k8s:
         api_version: apps/v1
         kind: Deployment
         name: guides
         namespace: infra
         definition:
-          metadata:
-            annotations:
-              kubernetes.io/change-cause: "Restarted at {{ ansible_date_time.iso8601 }}"
+          spec:
+            template:
+              metadata:
+                annotations:
+                  kubernetes.io/change-cause: "Restarted at {{ ansible_date_time.iso8601 }}"
+
       register: restart_result
 
     - name: Display result
