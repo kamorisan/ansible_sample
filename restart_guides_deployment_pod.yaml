@@ -1,7 +1,7 @@
 ---
 - name: Restart guides Deployment Pod
   hosts: localhost
-  gather_facts: false
+  gather_facts: true  # ここを変更
   tasks:
     - name: Restart Deployment by updating annotations
       kubernetes.core.k8s:
