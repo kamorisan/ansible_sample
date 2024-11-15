@@ -1,0 +1,17 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars:
+    cluster_host: "{{ lookup('env', 'CLUSTER_HOST') }}"
+    api_key: "{{ lookup('env', 'API_KEY') }}"
+  tasks:
+    - name: Gather cluster info
+      kubernetes.core.k8s_cluster_info:
+        host: "{{ cluster_host }}"
+        api_key: "{{ api_key }}"
+        validate_certs: false
+      register: registry_info
+
+    - name: Display cluster info
+      debug:
+        msg: "{{ registry_info }}"
