@@ -1,29 +1,23 @@
 ---
-- name: Restart PostgreSQL Pods
-  hosts: all
+- name: Restart Poestore PostgreSQL Pod
+  hosts: localhost
+  gather_facts: true
   tasks:
-    - name: Set OpenShift project
-      command: oc project petstore
-      register: project_result
-      failed_when: "'error' in project_result.stderr"
-      changed_when: False
+    - name: Restart DeploymentConfig by updating spec.template.metadata.annotations
+      kubernetes.core.k8s:
+        api_version: apps.openshift.io/v1
+        kind: DeploymentConfig
+        name: postgresql
+        namespace: petstore
+        definition:
+          spec:
+            template:
+              metadata:
+                annotations:
+                  openshift.io/change-cause: "Restarted at {{ ansible_date_time.iso8601 }}"
 
-    - name: Restart DeploymentConfig
-      command: oc rollout restart dc/postgresql -n petstore
       register: restart_result
-      failed_when: "'error' in restart_result.stderr"
 
-    - name: Wait for DeploymentConfig to be available
-      command: oc wait --for=condition=available dc/postgresql --timeout=300s -n petstore
-      register: wait_result
-      failed_when: "'error' in wait_result.stderr"
-
-    - name: Get Pod status
-      command: oc get pods -l name=postgresql -n petstore
-      register: pods_result
-      failed_when: "'error' in pods_result.stderr"
-      changed_when: False
-
-    - name: Show Pods Status
+    - name: Display result
       debug:
-        msg: "{{ pods_result.stdout }}"
+        var: restart_result
